@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const chromium = require("chrome-aws-lambda");
 const fetch = require("node-fetch");
 const { get } = require("http");
 const readline = require("readline").createInterface({
@@ -95,7 +96,13 @@ async function getAmountDue(url, pk) {
 }
 
 async function getStripePK(url) {
-  const browser = await puppeteer.launch();
+  const browser = await chromium.puppeteer.launch({
+    args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: true,
+    ignoreHTTPSErrors: true,
+  });
   const page = await browser.newPage();
   await page.setRequestInterception(true);
   let matchFound = false;
