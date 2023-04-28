@@ -2,6 +2,7 @@ const puppeteer = require("puppeteer");
 const chromium = require("chrome-aws-lambda");
 const fetch = require("node-fetch");
 const { get } = require("http");
+require("dotenv").config();
 const readline = require("readline").createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -97,9 +98,17 @@ async function getAmountDue(url, pk) {
 
 async function getStripePK(url) {
   const browser = await chromium.puppeteer.launch({
-    args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+    args: [
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+      "--single-process",
+      "--no-zygote",
+    ],
     defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath,
+    executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : await chromium.executablePath,
     headless: true,
     ignoreHTTPSErrors: true,
   });
